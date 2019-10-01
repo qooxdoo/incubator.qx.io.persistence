@@ -1,0 +1,36 @@
+{
+ "$schema": "https://raw.githubusercontent.com/qooxdoo/qooxdoo-compiler/master/source/resource/qx/tool/schema/Manifest-1-0-0.json",
+  "info" :
+  {
+    "name" : "incubator.qx.io.persistence",
+
+    "summary" : "Qooxdoo Persistence (Incubator)",
+    "description" : "Qooxdoo Persistence (Incubator)",
+
+    "homepage" : "https://qooxdoo.org",
+
+    "license" : "MIT license",
+    "authors" : [ 
+      {
+        "name": "John Spackman (johnspackman)",
+        "email": "john.spackman@zenesis.com"
+      }
+     ],
+
+    "version" : "1.0.0"
+  },
+
+  "provides" :
+  {
+    "namespace"   : "qx.io.persistence",
+    "encoding"    : "utf-8",
+    "class"       : "source/class",
+    "resource"    : "source/resource",
+    "translation" : "source/translation"
+  },
+
+  "requires": {
+    "@qooxdoo/framework": "^6.0.0-beta",
+    "@qooxdoo/compiler" : "^1.0.0-beta"
+  }
+}

@@ -1,0 +1,6 @@
+compiled/
+node_modules/
+test/website-db/_uuids/
+qx_packages
+.package-cache.json
+.settings/

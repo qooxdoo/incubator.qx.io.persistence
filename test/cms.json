@@ -1,0 +1,7 @@
+{
+    "database": {
+        "type": "file",
+        "directory": "website-db"
+    },
+    "theme": "qxl.cms.test.theme.TestTheme"
+}
