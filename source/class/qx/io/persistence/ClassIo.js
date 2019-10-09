@@ -1,3 +1,21 @@
+/* ************************************************************************
+
+   qooxdoo - the new era of web development
+
+   http://qooxdoo.org
+
+   Copyright:
+     2019 Zenesis Ltd http://www.zenesis.com
+
+   License:
+     MIT: https://opensource.org/licenses/MIT
+     See the LICENSE file in the project's top-level directory for details.
+
+   Authors:
+     * John Spackman (https://github.com/johnspackman)
+
+************************************************************************ */
+
 /**
  * Handles persistence for a specific class derived from qx.core.Object
  * 
@@ -195,8 +213,12 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         for (let i = 0; i < arr.length; i++) {
           if (arr[i]) {
             let arrayType = null;
-            if (typeof arr[i].$$classname == "string")
+            if (typeof arr[i].$$classname == "string") {
               arrayType = qx.Class.getByName(arr[i].$$classname);
+              if (!arrayType) {
+                this.error(`Unable to convert IObject in _fromJsonValue because cannot find class ${arr[i].$$classname}`);
+              }
+            }
             if (!arrayType && propertyDef)
               arrayType = propertyDef.arrayType;
             if (!arrayType) {

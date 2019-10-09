@@ -1,3 +1,21 @@
+/* ************************************************************************
+
+   qooxdoo - the new era of web development
+
+   http://qooxdoo.org
+
+   Copyright:
+     2019 Zenesis Ltd http://www.zenesis.com
+
+   License:
+     MIT: https://opensource.org/licenses/MIT
+     See the LICENSE file in the project's top-level directory for details.
+
+   Authors:
+     * John Spackman (https://github.com/johnspackman)
+
+************************************************************************ */
+
 /**
  * Annotation used to indicate properties which can be persisted in the database.  Properties are
  * not de/serialized by default, so this must be added to all properties

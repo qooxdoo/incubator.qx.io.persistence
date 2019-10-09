@@ -1,3 +1,21 @@
+/* ************************************************************************
+
+   qooxdoo - the new era of web development
+
+   http://qooxdoo.org
+
+   Copyright:
+     2019 Zenesis Ltd http://www.zenesis.com
+
+   License:
+     MIT: https://opensource.org/licenses/MIT
+     See the LICENSE file in the project's top-level directory for details.
+
+   Authors:
+     * John Spackman (https://github.com/johnspackman)
+
+************************************************************************ */
+
 /**
  * A Controller manages the import and export between Qooxdoo objects and their 
  * JSON equivalent (which could be in a local database or a remote server object)
