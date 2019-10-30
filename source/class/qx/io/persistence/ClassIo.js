@@ -18,12 +18,12 @@
 
 /**
  * Handles persistence for a specific class derived from qx.core.Object
- * 
+ *
  */
 qx.Class.define("qx.io.persistence.ClassIo", {
   extend: qx.core.Object,
   implement: [ qx.io.persistence.IIo ],
-  
+
   /**
    * Constructor
    * @param clazz {qx.Class} the class that this instance will be able to persist
@@ -31,7 +31,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
   construct(clazz) {
     this.base(arguments);
     this.__clazz = clazz;
-    
+
     // Get a list of all properties, all the way up the class heirarchy, and their property
     //  definition; along the way we merge property definitions (which means merging init values
     //  and annotations)
@@ -50,7 +50,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         else
           annos = qx.lang.Array.clone(annos);
       }
-      
+
       let current = properties[propertyName];
       if (current) {
         if (propertyDef.init !== undefined)
@@ -81,19 +81,19 @@ qx.Class.define("qx.io.persistence.ClassIo", {
     Object.keys(properties).forEach(propertyName => {
       let propertyDef = properties[propertyName];
       let allAnnos = propertyDef["@"]||[];
-      
+
       let annos = allAnnos.filter(anno => qx.Class.isSubClassOf(anno.constructor, qx.io.persistence.anno.Array));
       let arrayType = null;
       if (annos.length)
         arrayType = propertyDef.arrayType = annos[annos.length - 1].getArrayType();
-      
-      annos = allAnnos.filter(anno => qx.Class.isSubClassOf(anno.constructor, qx.io.persistence.anno.Property)); 
+
+      annos = allAnnos.filter(anno => qx.Class.isSubClassOf(anno.constructor, qx.io.persistence.anno.Property));
       if (!annos.length) {
         delete properties[propertyName];
         return;
       }
       propertyDef["@"] = annos;
-      
+
       // Embed or just have a reference to?
       for (let i = annos.length - 1; i >= 0; i--) {
         if (annos[i].isEmbed()) {
@@ -101,7 +101,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           break;
         }
       }
-      
+
       // Check for explicit IO on the property
       for (let i = annos.length - 1; i >= 0; i--) {
         let refIo = propertyDef.embed ? annos[i].getIo() : annos[i].getRefIo();
@@ -116,7 +116,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       if (propertyDef.check) {
         if (propertyDef.check === "Array") {
           refType = arrayType;
-          
+
         } else if (typeof propertyDef.check != "string") {
           if (qx.Class.isSubClassOf(propertyDef.check, qx.data.Array))
             refType = arrayType;
@@ -125,7 +125,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         }
       }
       propertyDef.refType = refType;
-      
+
       // See if we can guess
       if (refType) {
         // Get the default, registered implementation
@@ -134,20 +134,20 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           propertyDef.defaultRefIo = refIo;
       }
     });
-    
+
     this.__properties = properties;
   },
-  
+
   members: {
     /** {qx.Class} The class */
     __clazz: null,
-    
+
     /** {Map} A map of property definitions, indexed by property name */
     __properties: null,
-    
+
     /**
      * Reads JSON data and populates an object, creating it if required
-     * 
+     *
      * @param json {Object} the JSON data to load
      * @param obj {qx.core.Object?} the object to populate, created if not provided
      * @return {qx.core.Object} the populated object
@@ -155,43 +155,43 @@ qx.Class.define("qx.io.persistence.ClassIo", {
     async fromJson(ctlr, json, obj) {
       if (!obj)
         obj = ctlr.createObject(this.__clazz, json.uuid);
-      
+
       let promises = [];
       for (let propertyName in this.__properties) {
         if (json[propertyName] === undefined)
           continue;
-        
+
         let propertyDef = this.__properties[propertyName];
         let propertyPath = this.__clazz.classname + "." + propertyName;
         let annos = propertyDef["@"];
         let check = propertyDef.check;
-        
+
         let value = this._fromJsonValue(ctlr, json[propertyName], propertyDef, propertyPath);
         let promise = qx.util.Promisify.resolveNow(value, value => this._setPropertyValueImpl(ctlr, obj, propertyName, value, propertyDef, propertyPath));
         if (promise)
           promises.push(promise);
       }
-      
-      return qx.util.Promisify.allNow(promises, 
+
+      return qx.util.Promisify.allNow(promises,
           () => {
             ctlr.setObjectComplete(obj);
             return obj;
-          }, 
+          },
           err => {
             ctlr.setObjectComplete(obj, err);
             return obj;
           });
     },
-    
+
     /**
      * Serialises a single property value from JSON
-     * 
+     *
      * @param ctlr {qx.io.persistence.Controller} the controller
      * @param value {Object?} the value to deserialize
      * @param propertyDef {Map?} normalized map of property definition
      * @param propertyMap {String?} property path for debug output
      * @return {Object?} the deserialised version
-     * 
+     *
      * @async Note that this may return a promise
      */
     _fromJsonValue(ctlr, value, propertyDef, propertyPath) {
@@ -204,7 +204,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         }
         return qx.io.persistence.ClassRefIo.getDefaultRefIo(clazz);
       }
-      
+
       const convertArray = arr => {
         if (!qx.lang.Type.isArray(arr))
           arr = [arr];
@@ -222,7 +222,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
             if (!arrayType && propertyDef)
               arrayType = propertyDef.arrayType;
             if (!arrayType) {
-              this.error(`Unable to convert IObject in _fromJsonValue because cannot determine the type, value=${arr[i]} (${arr[i].$$classname})`); 
+              this.error(`Unable to convert IObject in _fromJsonValue because cannot determine the type, value=${arr[i]} (${arr[i].$$classname})`);
             } else {
               let refIo = getRefIo(arrayType);
               if (refIo) {
@@ -239,16 +239,16 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         }
         return qx.util.Promisify.allNow(arr);
       }
-      
+
       if (value === null || value === undefined)
         return value;
-      
+
       let check = propertyDef.check;
-      
+
       if (check && typeof check != "string") {
         if (qx.Class.isSubClassOf(check, qx.data.Array)) {
-          value = qx.util.Promisify.resolveNow(convertArray(value), arr => new qx.data.Array(arr)); 
-          
+          value = qx.util.Promisify.resolveNow(convertArray(value), arr => new qx.data.Array(arr));
+
         } else if (qx.Class.isSubClassOf(check, qx.core.Object)) {
           let refIo = propertyDef.refIo || propertyDef.defaultRefIo;
           if (refIo) {
@@ -265,14 +265,14 @@ qx.Class.define("qx.io.persistence.ClassIo", {
             value = null;
           }
         }
-        
+
       } else if (check === "Array") {
         value = convertArray(value);
-        
+
       } else if (check === "Date") {
         if (typeof value == "string") {
           try {
-            value = new Date(value); 
+            value = new Date(value);
           } catch(ex) {
             this.warn(`Cannot parse date: property=${propertyPath}, value=${JSON.stringify(value)}`);
             value = null;
@@ -281,37 +281,37 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           this.warn(`Cannot parse date which is not a string: property=${propertyPath}, value=${JSON.stringify(value)}`);
           value = null;
         }
-        
+
       } else if (check === "Integer") {
         value = parseInt(value, 10);
         if (isNaN(value)) {
           this.warn(`Cannot parse integer: property=${propertyPath}, value=${JSON.stringify(value)}`);
           value = null;
         }
-        
+
       } else if (check === "Number") {
         value = parseFloat(value);
         if (isNaN(value)) {
           this.warn(`Cannot parse float: property=${propertyPath}, value=${JSON.stringify(value)}`);
           value = null;
         }
-        
+
       } else if (check === "Boolean") {
         value = !!value;
-        
+
       } else if (check && qx.lang.Type.isArray(check)) {
         if (!qx.lang.Array.contains(check, value)) {
           this.warn(`Cannot apply invalid value: property=${propertyPath}, value=${JSON.stringify(value)}`);
           value = null;
         }
       }
-      
+
       return value;
     },
-    
+
     /**
      * Serializes the object into JSON
-     * 
+     *
      * @param ctlr {qx.io.persistence.Controller} the controller
      * @param obj {qx.core.Object} the object to serialize
      * @param json {Object?} the JSON to update, created if not provided
@@ -321,36 +321,36 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       if (!json)
         json = {};
       json.$$classname = obj.classname;
-      
+
       for (let propertyName in this.__properties) {
         let propertyDef = this.__properties[propertyName];
         let propertyPath = this.__clazz.classname + "." + propertyName;
         let annos = propertyDef["@"];
         let check = propertyDef.check;
-        
+
         let value = obj["get" + qx.lang.String.firstUp(propertyName)]();
         let jsonValue = await this._toJsonValue(ctlr, value, propertyDef, propertyPath);
         json[propertyName] = jsonValue;
       }
-      
+
       return json;
     },
-    
+
     /**
      * Serialises a single property value into JSON
-     * 
+     *
      * @param ctlr {qx.io.persistence.Controller} the controller
      * @param value {Object?} the value to serialize
      * @param propertyDef {Map?} normalized map of property definition
      * @param propertyMap {String?} property path for debug output
      * @return {Object?} the serialised version
-     * 
+     *
      * @async Note may return a promise
      */
     _toJsonValue(ctlr, value, propertyDef, propertyPath) {
       if (!propertyPath)
         propertyPath = "(unspecified)";
-      
+
       function getRefIo(clazz) {
         if (propertyDef) {
           if (propertyDef.refIo)
@@ -360,7 +360,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         }
         return qx.io.persistence.ClassRefIo.getDefaultRefIo(clazz);
       }
-      
+
       function convertArray(arr) {
         for (let i = 0; i < arr.length; i++) {
           let refIo = getRefIo(arr[i].constructor);
@@ -370,24 +370,22 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         }
         return qx.util.Promisify.allNow(arr);
       }
-      
+
       if (qx.io.persistence.ClassIo.isIObject(value)) {
         let refIo = getRefIo(value.constructor);
         value = refIo.toJson(ctlr, value);
-        
+
       } else if (value instanceof qx.data.Array) {
-        if (propertyPath == "cboulanger.eventrecorder.State.objectIds")
-          debugger;
         value = qx.lang.Array.clone(value.toArray());
         value = convertArray(value);
-        
+
       } else if (qx.lang.Type.isArray(value)) {
         value = qx.lang.Array.clone(value);
         value = convertArray(value);
-        
+
       } else if (value instanceof Date) {
         value = value.toISOString();
-        
+
       } else if (value instanceof qx.core.Object) {
         let refIo = propertyDef && (propertyDef.refIo || propertyDef.defaultRefIo);
         if (refIo) {
@@ -404,10 +402,10 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           value = null;
         }
       }
-      
+
       return value;
     },
-    
+
     watchForChanges(ctlr, obj, callback) {
       const ClassRefIo = qx.io.persistence.ClassRefIo.ClassRefIo;
       let state = {
@@ -415,7 +413,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           properties: {},
           callback
       };
-      
+
       Object.keys(this.__properties).forEach(propertyName => {
         let upname = qx.lang.String.firstUp(propertyName);
         let propertyDef = this.__properties[propertyName];
@@ -423,7 +421,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         let annos = propertyDef["@"];
         let check = propertyDef.check;
         let propState = state.properties[propertyName] = {};
-        
+
         if (qx.Class.isSubClassOf(propertyDef.check, qx.data.Array)) {
           const onArrayChange = evt => {
             let data = evt.getData();
@@ -433,7 +431,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
             } else {
               let removed = (data.removed||[]).map(item => this._toJsonValue(ctlr, item, propertyDef, propertyPath));
               let added = (data.added||[]).map(item => this._toJsonValue(ctlr, item, propertyDef, propertyPath));
-              
+
               if (added.length || removed.length) {
                 return qx.util.Promisify.allNow(removed, removed => {
                   return qx.util.Promisify.allNow(added, added => {
@@ -448,7 +446,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
               }
             }
           };
-          
+
           const onValueChange = evt => {
             let data = evt.getData();
             let oldData = evt.getOldData();
@@ -458,18 +456,18 @@ qx.Class.define("qx.io.persistence.ClassIo", {
             }
             let value = this._toJsonValue(ctlr, data, propertyDef, propertyPath);
             if (data) {
-              propState.arrayChangeListenerId = data.addListener("change", onArrayChange); 
+              propState.arrayChangeListenerId = data.addListener("change", onArrayChange);
               return qx.util.Promisify.resolveNow(value, value => callback(obj, propertyName, "arrayReplace", value));
             } else {
               return qx.util.Promisify.resolveNow(value, value => callback(obj, propertyName, "setValue", value));
             }
           };
-          
+
           propState.changeListenerId = obj.addListener("change" + upname, onValueChange);
           let array = obj["get" + upname]();
           if (array)
             propState.arrayChangeListenerId = array.addListener("change", onArrayChange);
-          
+
         } else {
           propState.changeListenerId = obj.addListener("change" + upname, evt => {
             let value = this._toJsonValue(ctlr, evt.getData(), propertyDef, propertyPath);
@@ -477,21 +475,21 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           });
         }
       });
-      
+
       return state;
     },
-    
+
     setPropertyValue(ctlr, obj, propertyName, changeType, value) {
       let propertyDef = this.__properties[propertyName];
       let propertyPath = this.__clazz.classname + "." + propertyName;
-      
+
       if (changeType == "arrayChange") {
         if (!qx.lang.Type.isArray(value))
           value = [value];
         let promises = value.map(value => {
           let removed = this._fromJsonValue(ctlr, value.removed, propertyDef, propertyPath)||[];
           let added = this._fromJsonValue(ctlr, value.added, propertyDef, propertyPath)||[];
-          
+
           return qx.util.Promisify.resolveNow(removed, removed => {
             return qx.util.Promisify.resolveNow(added, added => {
               let array = obj["get" + qx.lang.String.firstUp(propertyName)]();
@@ -501,28 +499,28 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           });
         });
         return qx.util.Promisify.allNow(promises);
-        
+
       } else if (changeType == "setValue" || changeType == "arrayReplace") {
         value = this._fromJsonValue(ctlr, value, propertyDef, propertyPath);
         return qx.util.Promisify.resolveNow(value, value => {
           return this._setPropertyValueImpl(ctlr, obj, propertyName, value, propertyDef, propertyPath);
         });
-        
-        
+
+
       } else {
         throw new Error(`Unexpected type of change ${changeType} for ${obj} (${obj.classname})`);
       }
     },
-    
+
     _setPropertyValueImpl(ctlr, obj, propertyName, value, propertyDef, propertyPath) {
       if (propertyDef.nullable !== true && value === null) {
         this.warn(`Cannot apply null value: property=${propertyPath}`);
         return null;
       }
-      
+
       if (value instanceof Promise)
         value = qx.Promise.resolve(value);
-      
+
       let setName = "set" + qx.lang.String.firstUp(propertyName);
       let promise = null;
       if (typeof obj[setName + "Async"] == "function") {
@@ -530,10 +528,10 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       } else {
         qx.util.Promisify.resolveNow(value, value => obj[setName](value));
       }
-      
+
       return promise;
     },
-    
+
     storeChange(store, propertyName, changeType, value) {
       if (changeType == "arrayChange") {
         if (store.arrayChange === undefined)
@@ -552,7 +550,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
           delete store.arrayChange[propertyName];
       }
     },
-    
+
     async restoreChanges(ctlr, store, obj) {
       let promises = [];
       if (store.setValue) {
@@ -563,10 +561,10 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         for (let key in store.arrayChange)
           promises.push(this.setPropertyValue(ctlr, obj, key, "arrayChange", store.arrayChange[key]));
       }
-      
+
       await qx.Promise.all(promises);
     },
-    
+
     unwatchForChanges(ctlr, state) {
       Object.keys(state.properties).forEach(propertyName => {
         let propState = state.properties[propertyName];
@@ -580,15 +578,15 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       delete state.properties;
     }
   },
-  
+
   statics: {
     __classIos: {},
-    
+
     /**
      * Registers the class for persisting references to qx.core.Object instances; this can be
      * overridden using annotations, but if specified manually this will override any annotations
      * on the actual class
-     * 
+     *
      * @param io {ClassIo} the [de]serializer
      */
     registerClassIo(io, suppressWarnings) {
@@ -600,10 +598,10 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       }
       ClassIo.__classIos[classname] = io;
     },
-    
+
     /**
      * Gets the default class for persisting references to qx.core.Object instances
-     * 
+     *
      * @return {ClassIo} the [de]serializer
      */
     getClassIo(clazz) {
@@ -624,10 +622,10 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       }
       return io;
     },
-    
+
     isIObject(obj) {
-      return obj && 
-        obj instanceof qx.core.Object && 
+      return obj &&
+        obj instanceof qx.core.Object &&
         qx.Interface.classImplements(obj.constructor, qx.io.persistence.IObject);
     }
   }
