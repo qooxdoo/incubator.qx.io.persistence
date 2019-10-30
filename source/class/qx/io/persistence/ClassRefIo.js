@@ -104,7 +104,7 @@ qx.Class.define("qx.io.persistence.ClassRefIo", {
       let ClassRefIo = qx.io.persistence.ClassRefIo;
       if (typeof clazz == "string")
         clazz = qx.Class.getByName(clazz);
-      let io = ClassRefIo.__refIos[clazz.classname];
+      let io = ClassRefIo.__refIos[clazz.classname] || null;
       if (!io) {
         let classAnnos = qx.Annotation.getClass(clazz, qx.io.persistence.anno.Class);
         for (let i = classAnnos.length - 1; i >= 0; i--) {
@@ -112,6 +112,9 @@ qx.Class.define("qx.io.persistence.ClassRefIo", {
           if (io != null)
             break;
         }
+      }
+      if (!io && qx.Class.isSubClassOf(clazz, qx.core.Object)) {
+        throw new Error(`Cannot reference instance of ${clazz} because it is a Qooxdoo class but which does not support persistence`); 
       }
       return io;
     }

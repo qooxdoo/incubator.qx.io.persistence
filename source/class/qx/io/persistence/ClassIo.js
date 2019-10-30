@@ -225,13 +225,15 @@ qx.Class.define("qx.io.persistence.ClassIo", {
               this.error(`Unable to convert IObject in _fromJsonValue because cannot determine the type, value=${arr[i]} (${arr[i].$$classname})`); 
             } else {
               let refIo = getRefIo(arrayType);
-              let source = arr[i];
-              arr[i] = refIo.fromJson(ctlr, source)
-                .then(value => {
-                  if (!value)
-                    this.error(`Unable to obtain IObject in _fromJsonValue, value=${JSON.stringify(source, null, 2)}`);
-                  return value;
-                });
+              if (refIo) {
+                let source = arr[i];
+                arr[i] = refIo.fromJson(ctlr, source)
+                  .then(value => {
+                    if (!value)
+                      this.error(`Unable to obtain IObject in _fromJsonValue, value=${JSON.stringify(source, null, 2)}`);
+                    return value;
+                  });
+              }
             }
           }
         }
@@ -362,7 +364,9 @@ qx.Class.define("qx.io.persistence.ClassIo", {
       function convertArray(arr) {
         for (let i = 0; i < arr.length; i++) {
           let refIo = getRefIo(arr[i].constructor);
-          arr[i] = refIo.toJson(ctlr, arr[i]);
+          if (refIo) {
+            arr[i] = refIo.toJson(ctlr, arr[i]);
+          }
         }
         return qx.util.Promisify.allNow(arr);
       }
@@ -372,6 +376,8 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         value = refIo.toJson(ctlr, value);
         
       } else if (value instanceof qx.data.Array) {
+        if (propertyPath == "cboulanger.eventrecorder.State.objectIds")
+          debugger;
         value = qx.lang.Array.clone(value.toArray());
         value = convertArray(value);
         
