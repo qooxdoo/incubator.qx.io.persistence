@@ -70,29 +70,46 @@ qx.Class.define("qx.io.persistence.Controller", {
       if (knownObject) {
         if (knownObject.complete === "error")
           throw new knownObject.exceptionThrown;
-        if (knownObject.complete === "success" || (allowIncomplete && knownObject.obj))
-          return knownObject.obj;
-        return knownObject.promise;
+        if (knownObject.complete === "success" || (allowIncomplete && knownObject.obj)) {
+          // Object has not changed on disk
+          if (!knownObject.isStale || !(await knownObject.isStale()))
+            return knownObject.obj;
+
+          // Try and reload
+          delete knownObject.isStale;
+          delete knownObject.complete;
+          delete knownObject.notified;
+          knownObject.reloading = true;
+          knownObject.promise = new qx.Promise();
+
+        } else {
+          // In progress
+          return knownObject.promise;
+        }
+
+      } else {
+        knownObject = this.__knownObjectsByUuid[uuid] = {
+            obj: null,
+            promise: new qx.Promise()
+        };
       }
-      
-      knownObject = this.__knownObjectsByUuid[uuid] = {
-          obj: null,
-          promise: new qx.Promise()
-      };
-      
-      let json = await this.__datasource.getDataFromUuid(uuid);
-      if (!json) {
+
+      let data = await this.__datasource.getDataFromUuid(uuid);
+      if (!data) {
         this.__knownObjectsByUuid[uuid].promise.resolve(null);
         return null;
       }
-      if (!json.$$classname) 
+      if (data.isStale)
+        knownObject.isStale = data.isStale;
+      
+      if (!data.json.$$classname) 
         throw new Error(`Cannot create object with UUID ${uuid} because it does not contain type information`);
-      let clz = qx.Class.getByName(json.$$classname);
+      let clz = qx.Class.getByName(data.json.$$classname);
       if (!clz) 
-        throw new Error(`Cannot create object with UUID ${uuid} because the class ${json.$$classname} does not exist`);
+        throw new Error(`Cannot create object with UUID ${uuid} because the class ${data.json.$$classname} does not exist`);
       
       let io = qx.io.persistence.ClassIo.getClassIo(clz);
-      io.fromJson(this, json);
+      io.fromJson(this, data.json);
       
       return knownObject.promise;
     },
@@ -385,6 +402,13 @@ qx.Class.define("qx.io.persistence.Controller", {
      * @return {qx.core.Object} the new object instance of `clazz`
      */
     createObject(clazz, uuid) {
+      let knownObject = this.__knownObjectsByUuid[uuid];
+      if (knownObject && knownObject.obj) {
+        if (knownObject.reloading)
+          return knownObject.obj;
+        throw new Error(`Cannot create an object twice during load for the same uuid (${uuid} for class ${clazz.classname})`);
+      }
+      
       let obj = new clazz();
       
       if (qx.Interface.classImplements(clazz, qx.io.persistence.IObjectNotifications)) {
@@ -397,15 +421,12 @@ qx.Class.define("qx.io.persistence.Controller", {
       else
         obj.setUuid(uuid);
       
-      let knownObject = this.__knownObjectsByUuid[uuid];
       if (!knownObject) {
         knownObject = this.__knownObjectsByUuid[uuid] = {
           obj: null,
           promise: new qx.Promise()
         };
       }
-      if (knownObject.obj !== null)
-        throw new Error(`Cannot create an object twice during load for the same uuid (${uuid} for class ${clazz.classname})`);
       knownObject.obj = obj;
 
       return obj;
@@ -439,6 +460,7 @@ qx.Class.define("qx.io.persistence.Controller", {
           knownObject.complete = "success";
           knownObject.promise.resolve(obj);
         }
+        delete knownObject.reloading;
         
         if (this.isAllComplete()) {
           Object.values(this.__knownObjectsByUuid).forEach(knownObject => {

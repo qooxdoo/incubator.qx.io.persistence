@@ -42,7 +42,9 @@ qx.Interface.define("qx.io.persistence.IDataSource", {
      * Loads JSON data for a UUID
      * 
      * @param uuid {String} the UUID to load
-     * @return {String}
+     * @return {Map} containing:
+     *  json {Object} the data
+     *  isStale {Function?} an optional function to check whether the data has become stale (ie reload is required)
      */
     async getDataFromUuid(uuid) {
     },

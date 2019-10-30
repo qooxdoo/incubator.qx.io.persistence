@@ -69,7 +69,9 @@ qx.Class.define("qx.io.persistence.db.MemoryDatabase", {
       if (!data) {
         this.warn("Cannot find document with uuid=" + uuid);
       }
-      return data;
+      return {
+        json: data
+      };
     },
     
     /**

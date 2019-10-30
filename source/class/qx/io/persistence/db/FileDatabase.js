@@ -117,12 +117,33 @@ qx.Class.define("qx.io.persistence.db.FileDatabase", {
         this.warn("Cannot find document with uuid=" + uuid);
         return null;
       }
-      let data = await qx.util.Json.loadJsonAsync(path.join(this.__rootDir, indexData.filename));
+      const filename = path.join(this.__rootDir, indexData.filename);
+      let mtime = null;
+      try {
+        let stat = await fs.statAsync(filename);
+        mtime = stat.mtime;
+      } catch(ex) {
+        throw new Error(`Cannot find data for uuid ${uuid}: ${ex}`); 
+      }
+      let data = await qx.util.Json.loadJsonAsync(filename);
       if (!data.uuid)
         data.uuid = uuid;
       else if (data.uuid != uuid)
         throw new Error(`Error while loading ${uuid} - file ${indexData.filename} has wrong uuid, found ${data.uuid}`); 
-      return data;
+      return {
+        json: data,
+        mtime: mtime,
+        async isStale() {
+          let stat = null;
+          try {
+            stat = await fs.statAsync(filename);
+          } catch(ex) {
+            // File has been deleted
+            return true;
+          }
+          return stat && stat.mtime.getTime() > mtime.getTime();
+        }
+      };
     },
     
     /*
