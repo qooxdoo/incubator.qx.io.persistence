@@ -221,9 +221,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
             }
             if (!arrayType && propertyDef)
               arrayType = propertyDef.arrayType;
-            if (!arrayType) {
-              this.error(`Unable to convert IObject in _fromJsonValue because cannot determine the type, value=${arr[i]} (${arr[i].$$classname})`);
-            } else {
+            if (arrayType) {
               let refIo = getRefIo(arrayType);
               if (refIo) {
                 let source = arr[i];
