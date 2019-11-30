@@ -213,10 +213,10 @@ qx.Class.define("qx.io.persistence.ClassIo", {
         for (let i = 0; i < arr.length; i++) {
           if (arr[i]) {
             let arrayType = null;
-            if (typeof arr[i].$$classname == "string") {
-              arrayType = qx.Class.getByName(arr[i].$$classname);
+            if (typeof arr[i].__classname == "string") {
+              arrayType = qx.Class.getByName(arr[i].__classname);
               if (!arrayType) {
-                this.error(`Unable to convert IObject in _fromJsonValue because cannot find class ${arr[i].$$classname}`);
+                this.error(`Unable to convert IObject in _fromJsonValue because cannot find class ${arr[i].__classname}`);
               }
             }
             if (!arrayType && propertyDef)
@@ -318,7 +318,7 @@ qx.Class.define("qx.io.persistence.ClassIo", {
     async toJson(ctlr, obj, json) {
       if (!json)
         json = {};
-      json.$$classname = obj.classname;
+      json.__classname = obj.classname;
 
       for (let propertyName in this.__properties) {
         let propertyDef = this.__properties[propertyName];

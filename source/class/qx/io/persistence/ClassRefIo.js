@@ -52,9 +52,9 @@ qx.Class.define("qx.io.persistence.ClassRefIo", {
     async fromJson(ctlr, json) {
       if (json === null)
         return null;
-      let clazz = qx.Class.getByName(json.$$classname);
+      let clazz = qx.Class.getByName(json.__classname);
       if (!clazz) {
-        this.error(`Cannot deserialize class because there is no class called ${json.$$classname}`);
+        this.error(`Cannot deserialize class because there is no class called ${json.__classname}`);
         return null;
       }
       let obj = ctlr.getByUuidNoWait(json.uuid, true);
@@ -73,7 +73,7 @@ qx.Class.define("qx.io.persistence.ClassRefIo", {
       if (obj === null)
         return null;
       ctlr.putDependentObject(obj);
-      return { uuid: obj.getUuid(), $$classname: obj.classname };
+      return { uuid: obj.getUuid(), __classname: obj.classname };
     }
   },
   

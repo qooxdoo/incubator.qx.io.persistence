@@ -60,36 +60,39 @@ qx.Class.define("qx.io.persistence.db.Database", {
     },
     
     /**
-     * Loads an object from a URL
+     * Searches the database, and returns the first JSON object that matches.
+     * Note that the functionality of this is really determined by the underlying
+     * implementation, but a facility to compare objects (see NeDB or MongoDB)
+     * is expected.
      * 
-     * @param url {String} the path (not including `.html`)
-     * @return {qx.core.Object}
+     * @param query {Object} NeDB query
+     * @param projection {Object?} NeDB projection
+     * @return {Object?} the matched data, or null
      */
-    async getUuidFromUrl(url) {
-      if (url === "/") {
-        url = "index";
-      } else if (url[url.length - 1] === "/") {
-        url = url + "index";
-      }
-      return this._getUuidFromUrlImpl(url);
+    async findOne(query, projection) {
+      throw new Error(`No implementation for ${this.classname}.findOne`);
     },
-   
+    
+    /**
+     * Searches the database, and returns all the JSON objects that match.
+     * Note that the functionality of this is really determined by the underlying
+     * implementation, but a facility to compare objects (see NeDB or MongoDB)
+     * is expected.
+     * 
+     * @param query {Object} NeDB query
+     * @param projection {Object?} NeDB projection
+     * @return {Object[]} the matched data, or empty array
+     */
+    async find(query, projection, cb) {
+      throw new Error(`No implementation for ${this.classname}.find`);
+    },
+    
     /**
      * Creates a UUID for the ID
      */
     createUuid() {
       let uuid = qx.util.Uuid.createUuidV4();
       return uuid;
-    },
-    
-    /**
-     * Maps a URL to a UUID - this is the implementation behind `getUuidFromUrl()`
-     * 
-     * @param url {String} the URl to lookup
-     * @return {String?} the UUID, or null if not found
-     */
-    async _getUuidFromUrlImpl(url) {
-      throw new Error("No such implementation for " + this.classname + "._getUuidFromUrlImpl()");
     }
   }
 });

@@ -32,6 +32,8 @@ qx.Class.define("qx.test.io.persistence.TestRunnerApp", {
       }
       
       qx.dev.TestRunner.runAll(qx.test.io.persistence.TestPersistence);
+      qx.dev.TestRunner.runAll(qx.test.io.persistence.TestImportExport);
+      qx.dev.TestRunner.runAll(qx.test.io.persistence.TestNedbDatabase);
     }
   }
 });

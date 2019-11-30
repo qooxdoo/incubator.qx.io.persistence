@@ -1,4 +1,4 @@
 {
-    $$classname: "qx.test.io.persistence.Page",
+    __classname: "qx.test.io.persistence.Page",
     title: "Home Page"
 }

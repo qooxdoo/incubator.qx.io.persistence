@@ -28,6 +28,8 @@
   "dependencies": {
     "ajv": "^6.10.2",
     "better-ajv-errors": "^0.6.7",
-    "mkpath": "^1.0.0"
+    "fs-extra": "^8.1.0",
+    "mkpath": "^1.0.0",
+    "nedb": "^1.8.0"
   }
 }

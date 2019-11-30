@@ -36,6 +36,15 @@ qx.Class.define("qx.test.io.persistence.Page", {
       "@": qx.io.persistence.anno.Property.DEFAULT
     },
     
+    /** URL of the page, relative to the website root */
+    url: {
+      init: null,
+      nullable: true,
+      check: "String",
+      event: "changeUrl",
+      "@": qx.io.persistence.anno.Property.DEFAULT
+    },
+    
     /** Last modified date */
     lastModified: {
       init: null,

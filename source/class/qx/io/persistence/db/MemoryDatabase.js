@@ -28,13 +28,24 @@ qx.Class.define("qx.io.persistence.db.MemoryDatabase", {
   members: {
     _db: null,
     
+    /**
+     * Imports the database from disk
+     * 
+     * @param dir {String} the directory to import from
+     * @param erase {Boolean?} it true, the current in memory database will be erased
+     */
+    async importFromDisk(dir, erase) {
+      if (erase)
+        this._db = { jsonByUuid: {} };
+      await new qx.io.persistence.db.ImportExport(dir, this).importToDb();
+    },
+    
     /*
      * @Override
      */
     async open() {
       this._db = {
-          jsonByUuid: {},
-          uuidByUrl: {}
+          jsonByUuid: {}
       };
       return await this.base(arguments);
     },
@@ -56,9 +67,26 @@ qx.Class.define("qx.io.persistence.db.MemoryDatabase", {
     /*
      * @Override
      */
-    async _getUuidFromUrlImpl(url) {
-      let uuid = this._db.uuidByUrl[url] || null;
-      return uuid;
+    async findOne(query, projection) {
+      for (let uuid in this._db.jsonByUuid) {
+        let json = this._db.jsonByUuid[uuid];
+        if (qx.io.persistence.db.Utils.matchQuery(json, query))
+          return json;
+      }
+      return null;
+    },
+    
+    /*
+     * @Override
+     */
+    async find(query, projection) {
+      let result = [];
+      for (let uuid in this._db.jsonByUuid) {
+        let json = this._db.jsonByUuid[uuid];
+        if (qx.io.persistence.db.Utils.matchQuery(json, query))
+          result.push(json);
+      }
+      return result;
     },
     
     /*
@@ -72,16 +100,6 @@ qx.Class.define("qx.io.persistence.db.MemoryDatabase", {
       return {
         json: data
       };
-    },
-    
-    /**
-     * Adds a mapping of URL to UUID
-     * 
-     * @param url {String} the URL
-     * @param uuid {String} the UUID to map to the URL
-     */
-    addUrlMapping(url, uuid) {
-      this._db.uuidByUrl[url] = uuid;
     },
     
     /*

@@ -21,6 +21,13 @@ const path = require("path");
 
 /**
  * Implements a database using the disk
+ * 
+ * @deprecated
+ * 
+ * NOTE :: You probably don't want this - it was built for quick and dirty testing
+ * during development, but has been replaced with the NedbDatabase implementation
+ * (which also gives the find and findOne implementations).
+ * 
  */
 qx.Class.define("qx.io.persistence.db.FileDatabase", {
   extend: qx.io.persistence.db.Database,
@@ -76,36 +83,6 @@ qx.Class.define("qx.io.persistence.db.FileDatabase", {
     async _saveImpl() {
       if (this._db)
         await qx.util.Json.saveJsonAsync(path.join(this.__rootDir, "db.json"), this._db);
-    },
-    
-    /*
-     * @Override
-     */
-    async _getUuidFromUrlImpl(url) {
-      let filename = path.resolve(this.__rootDir, url + ".json");
-      let relative = path.relative(this.__rootDir, filename);
-      
-      let uuid = this._db.idFromFilename[relative];
-      if (uuid)
-        return uuid;
-      
-      let data = await qx.util.Json.loadJsonAsync(filename);
-      if (!data) {
-        return null;
-      }
-      if (!data.uuid) {
-          data.uuid = this.createUuid();
-      }
-      
-      this._db.idFromFilename[relative] = data.uuid;
-      let indexData = this._db.ids[data.uuid];
-      if (!indexData)
-        indexData = this._db.ids[data.uuid] = {};
-      if (indexData.filename !== relative)
-        indexData.filename = relative;
-      
-      this.__debounceSaveImpl();
-      return data.uuid;
     },
     
     /*

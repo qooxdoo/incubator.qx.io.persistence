@@ -96,26 +96,26 @@ qx.Class.define("qx.test.io.persistence.TestPersistence", {
     },
     
     async __getByUrl(db, ctlr, url) {
-      let uuid = await db.getUuidFromUrl(url);
+      let json = await db.findOne({ url }, { uuid: 1 });
+      let uuid = json.uuid;
       let obj = uuid ? await ctlr.getByUuid(uuid) : null;
       return obj;
     },
     
     testObjectIo() {
       const doTest = async () => {
-        let db = new qx.io.persistence.db.FileDatabase("test/website-db");
+        let db = new qx.io.persistence.db.MemoryDatabase();
         let ctlr = new qx.io.persistence.Controller(db);
         let obj;
         
         await db.open();
+        await db.importFromDisk("test/website-db");
         obj = await this.__getByUrl(db, ctlr, "configuration/site");
         let uuid = obj.getUuid();
         this.assertInstance(obj, qx.test.io.persistence.Site);
         obj.setTitle("My Title A");
         await ctlr.put(obj);
-        await db.close();
-        
-        await db.open();
+
         obj = await this.__getByUrl(db, ctlr, "configuration/site");
         this.assertInstance(obj, qx.test.io.persistence.Site);
         this.assertEquals("My Title A", obj.getTitle());
@@ -134,11 +134,12 @@ qx.Class.define("qx.test.io.persistence.TestPersistence", {
     
     testReferences() {
       const doTest = async () => {
-        let db = new qx.io.persistence.db.FileDatabase("test/website-db");
+        let db = new qx.io.persistence.db.MemoryDatabase();
         let ctlr = new qx.io.persistence.Controller(db);
         let obj;
         
         await db.open();
+        await db.importFromDisk("test/website-db");
         let ref1 = new qx.test.io.persistence.DemoReferences().set({ title: "One" });
         let ref2 = new qx.test.io.persistence.DemoReferences().set({ title: "Two" });
         ref1.setOther(ref2);
@@ -149,13 +150,12 @@ qx.Class.define("qx.test.io.persistence.TestPersistence", {
         let id2 = ref2.getUuid();
         console.log(`ref1 = ${id1}`);
         console.log(`ref2 = ${id2}`);
-        await db.close();
-        let data = await qx.util.Json.loadJsonAsync(`test/website-db/_uuids/${id1}.json`);
-        this.assertEquals(data.other.uuid, id2);
+
+        let data = await db.getDataFromUuid(id1);
+        this.assertEquals(data.json.other.uuid, id2);
         ref1 = null;
         ref2 = null;
         
-        await db.open();
         ref1 = await ctlr.getByUuid(id1);
         this.assertTrue(!!ref1.getOther());
         this.assertEquals(ref1.getUuid(), id1);
@@ -165,16 +165,14 @@ qx.Class.define("qx.test.io.persistence.TestPersistence", {
         
         await ctlr.put(ref2);
         await ctlr.put(ref1);
-        await db.close();
         
-        data = await qx.util.Json.loadJsonAsync(`test/website-db/_uuids/${id1}.json`);
-        this.assertEquals(data.other.uuid, id2);
-        data = await qx.util.Json.loadJsonAsync(`test/website-db/_uuids/${id2}.json`);
-        this.assertEquals(data.other.uuid, id1);
+        data = await db.getDataFromUuid(id1);
+        this.assertEquals(data.json.other.uuid, id2);
+        data = await db.getDataFromUuid(id2);
+        this.assertEquals(data.json.other.uuid, id1);
         ref1 = null;
         ref2 = null;
         
-        await db.open();
         ref1 = await ctlr.getByUuid(id1);
         ref2 = await ctlr.getByUuid(id2);
         
