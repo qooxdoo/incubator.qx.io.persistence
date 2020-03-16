@@ -12,7 +12,7 @@
         "email": "john.spackman@zenesis.com"
       }
     ],
-    "version": "1.0.0"
+    "version": "0.0.1"
   },
   "provides": {
     "namespace": "qx.io.persistence",
@@ -23,7 +23,6 @@
   },
   "requires": {
     "@qooxdoo/framework": "^6.0.0-beta",
-    "@qooxdoo/compiler": "^1.0.0-beta",
-    "qooxdoo/incubator.qx.util": "^0.0.3"
+    "@qooxdoo/compiler": "^1.0.0-beta"
   }
 }
