@@ -1,10 +1,10 @@
-const fs = require("fs-extra");
 
 qx.Class.define("qx.test.io.persistence.TestImportExport", {
   extend: qx.dev.unit.TestCase,
 
   members: {
     testImportExport() {
+      const fs = qx.util.Require.require("fs-extra");
       const doTest = async () => {
         let db = new qx.io.persistence.db.MemoryDatabase();
         await db.open();

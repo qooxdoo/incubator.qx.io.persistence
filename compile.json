@@ -54,9 +54,6 @@
 		"qx.icontheme": "Tango",
 		"qxl.cms.client.theme": "qxl.cms.client.theme.Simple"
 	},
-	"libraries": [
-	   ".", "../incubator.qx.util"
-	],
 	"applications": [
         {
             "class": "qx.test.io.persistence.TestRunnerApp",
