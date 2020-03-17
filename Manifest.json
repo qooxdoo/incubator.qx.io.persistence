@@ -23,6 +23,7 @@
   },
   "requires": {
     "@qooxdoo/framework": "^6.0.0-beta",
-    "@qooxdoo/compiler": "^1.0.0-beta"
+    "@qooxdoo/compiler": "^1.0.0-beta",
+    "qooxdoo/incubator.qx.util": "^0.0.3"
   }
 }
