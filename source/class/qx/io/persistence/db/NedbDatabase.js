@@ -74,6 +74,13 @@ qx.Class.define("qx.io.persistence.db.NedbDatabase", {
     /*
      * @Override
      */
+    async flush() {
+      this._db.persistence.compactDatafile();
+    },
+    
+    /*
+     * @Override
+     */
     async find(query, projection) {
       let result = await qx.util.Promisify.call(cb => this._db.find(query, projection, cb)); 
       return result;
@@ -91,7 +98,7 @@ qx.Class.define("qx.io.persistence.db.NedbDatabase", {
      * @Override
      */
     async getDataFromUuid(uuid) {
-      let data = this.findOne({ _id: uuid });
+      let data = await this.findOne({ _id: uuid });
       return {
         json: data
       };
@@ -101,7 +108,13 @@ qx.Class.define("qx.io.persistence.db.NedbDatabase", {
      * @Override
      */
     async put(uuid, json) {
-      await qx.util.Promisify.call(cb => this._db.update({ _id: uuid }, json, { upsert: true }, cb));
+      json._id = json.uuid;
+      await qx.util.Promisify.call(cb => {
+        this._db.update({ _id: uuid }, json, { upsert: true }, (err, numAffected, affectedDocuments, upsert) => {
+          console.log("Update: " + JSON.stringify({err, numAffected, affectedDocuments, upsert}));
+          cb(err);
+        });
+      });
     },
     
     /*

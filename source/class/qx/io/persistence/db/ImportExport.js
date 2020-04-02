@@ -37,7 +37,7 @@ qx.Class.define("qx.io.persistence.db.ImportExport", {
           if (file.isDirectory()) {
             let fileUrl = (url.length ? url + "/" : "") + file.name;
             await scan(path.join(dir, file.name), fileUrl);
-            return;
+            continue;
           }
           if (!file.isFile() || !file.name.endsWith(".json"))
             continue;
@@ -84,6 +84,8 @@ qx.Class.define("qx.io.persistence.db.ImportExport", {
         }
       };
       await scan(this.__rootDir, "");
+      await this.__db.flush();
+      await this.__db.save();
     },
     
     /**
