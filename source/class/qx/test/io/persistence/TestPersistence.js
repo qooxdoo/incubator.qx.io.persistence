@@ -16,9 +16,6 @@
 
 ************************************************************************ */
 
-const fs = qx.util.Promisify.fs;
-const mkpath = qx.util.Promisify.promisify(require("mkpath"));
-
 qx.Class.define("qx.test.io.persistence.TestPersistence", {
   extend: qx.dev.unit.TestCase,
 

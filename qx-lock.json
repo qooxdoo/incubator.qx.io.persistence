@@ -1,0 +1,13 @@
+{
+  "libraries": [
+    {
+      "library_name": "incubator.qx.util",
+      "library_version": "0.0.3",
+      "path": "qx_packages/qooxdoo_incubator_qx_util_v0_0_3",
+      "uri": "qooxdoo/incubator.qx.util",
+      "repo_name": "qooxdoo/incubator.qx.util",
+      "repo_tag": "v0.0.3"
+    }
+  ],
+  "version": "2.1.0"
+}

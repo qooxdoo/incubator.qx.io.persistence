@@ -18,7 +18,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const Nedb = require("nedb");
 
 /**
  * Implements a database using NeDB (https://github.com/louischatriot/nedb)
@@ -41,7 +40,8 @@ qx.Class.define("qx.io.persistence.db.NedbDatabase", {
     async open() {
       if (!fs.existsSync(this.__rootDir))
         throw new Error("Cannot find root directory for database: " + this.__rootDir);
-      this._db = new Nedb({
+        const Nedb = qx.util.Require.require("nedb");
+        this._db = new Nedb({
         filename: path.join(this.__rootDir, "documents.nedb")
       });
       await qx.util.Promisify.call(cb => this._db.loadDatabase(cb));

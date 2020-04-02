@@ -1,10 +1,10 @@
-const fs = require("fs-extra");
 
 qx.Class.define("qx.test.io.persistence.TestNedbDatabase", {
   extend: qx.dev.unit.TestCase,
 
   members: {
     testImportExport() {
+      const fs = qx.util.Require.require("fs-extra");
       const doTest = async () => {
         fs.emptyDir("test/temp/website-db-nedb");
         let db = new qx.io.persistence.db.NedbDatabase("test/temp/website-db-nedb");
