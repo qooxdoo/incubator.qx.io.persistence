@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/qooxdoo/qooxdoo-compiler/master/source/resource/qx/tool/schema/Manifest-1-0-0.json",
   "info": {
-    "name": "incubator.qx.io.persistence",
+    "name": "qooxdoo/incubator.qx.io.persistence",
     "summary": "Qooxdoo Persistence (Incubator)",
     "description": "Qooxdoo Persistence (Incubator)",
     "homepage": "https://qooxdoo.org",

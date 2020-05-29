@@ -102,11 +102,11 @@ qx.Class.define("qx.io.persistence.Controller", {
       if (data.isStale)
         knownObject.isStale = data.isStale;
       
-      if (!data.json.__classname) 
+      if (!data.json._classname) 
         throw new Error(`Cannot create object with UUID ${uuid} because it does not contain type information`);
-      let clz = qx.Class.getByName(data.json.__classname);
+      let clz = qx.Class.getByName(data.json._classname);
       if (!clz) 
-        throw new Error(`Cannot create object with UUID ${uuid} because the class ${data.json.__classname} does not exist`);
+        throw new Error(`Cannot create object with UUID ${uuid} because the class ${data.json._classname} does not exist`);
       
       let io = qx.io.persistence.ClassIo.getClassIo(clz);
       io.fromJson(this, data.json);
@@ -138,7 +138,7 @@ qx.Class.define("qx.io.persistence.Controller", {
     async __putImpl(obj) {
       let io = qx.io.persistence.ClassIo.getClassIo(obj.constructor);
       let json = await io.toJson(this, obj);
-      json.__classname = obj.classname;
+      json._classname = obj.classname;
       let uuid = obj.getUuid();
       if (!uuid) {
         uuid = this.__datasource.createUuid();

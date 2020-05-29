@@ -16,7 +16,7 @@ qx.Class.define("qx.test.io.persistence.TestNedbDatabase", {
         json = await db.findOne({ uuid: "9a946080-b923-11e9-81cd-e3ec9930a628" });
         this.assertTrue(!!json);
         this.assertTrue(json.uuid == "9a946080-b923-11e9-81cd-e3ec9930a628");
-        this.assertTrue(json.__classname == "qx.test.io.persistence.Site");
+        this.assertTrue(json._classname == "qx.test.io.persistence.Site");
         this.assertTrue(json.url == "configuration/site");
         
         db.close();
